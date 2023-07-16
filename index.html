@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #myCanvas {
+      border:1px solid #d3d3d3;
+      background-color: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="myCanvas" width="500" height="500"></canvas>
+
+<div id="birdNames"></div>
+
+<input id="numColors" type="number" min="4" max="12" value="4">
+<label for="numColors">Number</label>
+<button id="confirmBtn">Confirm</button>
+
+<button id="spinBtn" disabled>Spin</button>
+
+<div id="prize"></div>
+
+<audio id="spinSound" src="http://soundbible.com/grab.php?id=2068&type=mp3" preload="auto"></audio>
+
+<script>
+var canvas = document.getElementById('myCanvas');
+var ctx = canvas.getContext('2d');
+
+var birds = ["Emu", "Cockatoo", "Kookaburra", "Lyrebird", "Fairy Penguin", "Galah", "Pelican", "Rainbow Lorikeet", "Rosella", "Budgerigar", "Sulfur-Crested Cockatoo", "Cassowary"];
+var colors = ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#00FFFF", "#FF00FF", "#C0C0C0", "#808080", "#800000", "#808000", "#800080", "#008080"];
+var startAngle = 0;
+var spinTimeout = null;
+var spinTime = 0;
+var spinTimeTotal = 0;
+
+var numSectors = document.getElementById('numColors').value;
+var sectorArc = 2 * Math.PI / numSectors;
+var spinCount = 0;
+
+document.getElementById('confirmBtn').addEventListener('click', function() {
+  drawWheel();
+  document.getElementById('spinBtn').disabled = false;
+  spinCount = 0;
+});
+
+function drawWheel() {
+  numSectors = document.getElementById('numColors').value;
+  sectorArc = 2 * Math.PI / numSectors;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  var birdNames = '';
+  
+  ctx.save();
+  ctx.translate(250, 250);
+  ctx.rotate(startAngle);
+
+  for(var i = 0; i < numSectors; i++) {
+    var angle = i * sectorArc;
+    ctx.beginPath();
+    ctx.fillStyle = colors[i];
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, 200, angle, angle + sectorArc, false);
+    ctx.lineTo(0, 0);
+    ctx.fill();
+
+    // Draw bird names
+    var birdAngle = angle + sectorArc / 2;
+    var birdX = 200 / 2 * Math.cos(birdAngle);
+    var birdY = 200 / 2 * Math.sin(birdAngle);
+    ctx.fillStyle = '#000000';
+    ctx.font = '20px Arial';
+    ctx.fillText(birds[i], birdX, birdY);
+
+    birdNames += '<p>' + colors[i] + ': ' + birds[i] + '</p>';
+  }
+
+  document.getElementById('birdNames').innerHTML = birdNames;
+
+  // Draw pointer
+  ctx.beginPath();
+  ctx.fillStyle = '#000000';
+  ctx.moveTo(-20, 0);
+  ctx.lineTo(20, 0);
+  ctx.lineTo(0, -40);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.restore();
+}
+
+function spin() {
+  spinTime += 100; // increase spin time for faster spin
+  if(spinTime >= spinTimeTotal) {
+    stopSpinWheel();
+    return;
+  }
+  var spinAngleStart = Math.random() * 10 + 10; // increase angle for faster spin
+  startAngle += (spinAngleStart * Math.PI / 180);
+  drawWheel();
+  spinTimeout = setTimeout(spin, 30);
+}
+
+function stopSpinWheel() {
+  clearTimeout(spinTimeout);
+  var degrees = startAngle * 180 / Math.PI + 90;
+  var arcd = sectorArc * 180 / Math.PI;
+  var index = Math.floor((360 - degrees % 360) / arcd);
+  var text = 'Prize: ' + birds[index];
+  document.getElementById('prize').innerText = text;
+  spinCount++;
+  if (spinCount >= numSectors) {
+    document.getElementById('spinBtn').disabled = true;
+  }
+}
+
+document.getElementById('spinBtn').addEventListener('click', function() {
+  document.getElementById('spinSound').play();
+  spinTime = 0;
+  spinTimeTotal = Math.random() * 3 + 4 * 1000;
+  spin();
+});
+</script>
+
+</body>
+</html>
