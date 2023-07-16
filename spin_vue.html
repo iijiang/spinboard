@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+  <style>
+    canvas {
+      border:1px solid #d3d3d3;
+      background-color: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <canvas ref="canvas" width="500" height="500"></canvas>
+  <div>
+    <input v-model="numSectors" type="number" min="4" max="12" value="4">
+    <button @click="initWheel">确认</button>
+    <button @click="spinWheel" :disabled="isDisabled">开始转动</button>
+  </div>
+  <div>{{prize}}</div>
+</div>
+
+<script>
+new Vue({
+  el: '#app',
+  data() {
+    return {
+      ctx: null,
+      birds: ["Emu", "Cockatoo", "Kookaburra", "Lyrebird", "Fairy Penguin", "Galah", "Pelican", "Rainbow Lorikeet", "Rosella", "Budgerigar", "Sulfur-Crested Cockatoo", "Cassowary"],
+      colors: ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#00FFFF", "#FF00FF", "#C0C0C0", "#808080", "#800000", "#808000", "#800080", "#008080"],
+      startAngle: 0,
+      numSectors: 4,
+      sectorArc: 2 * Math.PI / 4,
+      isDisabled: true,
+      prize: '',
+      chosenBirdIndex: 0
+    }
+  },
+  watch: {
+    numSectors: function() {
+      this.sectorArc = 2 * Math.PI / this.numSectors;
+      this.drawWheel();
+    }
+  },
+  methods: {
+    initWheel() {
+      this.ctx = this.$refs.canvas.getContext('2d');
+      this.isDisabled = false;
+      this.drawWheel();
+    },
+    drawWheel() {
+      this.ctx.clearRect(0, 0, this.$refs.canvas.width, this.$refs.canvas.height);
+      this.ctx.save();
+      this.ctx.translate(250, 250);
+      this.ctx.rotate(this.startAngle);
+      for(var i = 0; i < this.numSectors; i++) {
+        var angle = i * this.sectorArc;
+        this.ctx.beginPath();
+        this.ctx.fillStyle = this.colors[i];
+        this.ctx.moveTo(0, 0);
+        this.ctx.arc(0, 0, 200, angle, angle + this.sectorArc, false);
+        this.ctx.lineTo(0, 0);
+        this.ctx.fill();
+        // Draw bird names
+        var birdAngle = angle + this.sectorArc / 2;
+        var birdX = 200 / 2 * Math.cos(birdAngle);
+        var birdY = 200 / 2 * Math.sin(birdAngle);
+        this.ctx.fillStyle = '#000000';
+        this.ctx.font = '20px Arial';
+        this.ctx.fillText(this.birds[i], birdX, birdY);
+      }
+      this.ctx.restore();
+      // Draw pointer
+      this.ctx.beginPath();
+      this.ctx.fillStyle = '#000000';
+      this.ctx.moveTo(250, 250);
+      this.ctx.lineTo(250+20, 250);
+      this.ctx.lineTo(250, 250-40);
+      this.ctx.closePath();
+      this.ctx.fill();
+    },
+    spinWheel() {
+      const spinDuration = 0.1;  // Adjust this for faster or slower spin
+      this.startAngle += spinDuration;
+      this.drawWheel();
+      if(this.startAngle > 2*Math.PI) {
+        this.isDisabled = true;
+        this.startAngle = 0;
+        this.chosenBirdIndex = Math.floor(Math.random() * this.numSectors);  // random index for prize
+        const birdPrize = this.birds[this.chosenBirdIndex]; // select the bird prize
+        this.prize = "Prize: " + birdPrize;
+        this.finalSpin();
+      } else {
+        requestAnimationFrame(this.spinWheel);
+      }
+    },
+    finalSpin() {
+      const targetAngle = (2 * Math.PI) - (this.chosenBirdIndex * this.sectorArc) - (this.sectorArc / 2);
+      const spinDuration = 0.02;  // Adjust this for faster or slower spin
+      if (this.startAngle < targetAngle) {
+        this.startAngle += spinDuration;
+        this.drawWheel();
+        requestAnimationFrame(this.finalSpin);
+      }
+    }
+  }
+});
+</script>
+
+</body>
+</html>
