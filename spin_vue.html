@@ -37,16 +37,28 @@
 
     /* Modal Content */
     .modal-content {
-      position: relative;
-      background-color: #fefefe;
-      margin: auto;
-      padding: 0;
-      border: 1px solid #888;
-      width: 300px;
-      height: 400px;
-      box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
-      animation-name: animatetop;
-      animation-duration: 0.4s
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Change this line */
+    background-color: #fefefe;
+    margin: auto;
+    padding: 0;
+    border: 1px solid #888;
+    width: 300px;
+    height: 400px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+    }
+
+/* Add a new style for .modal-body */
+    .modal-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1; /* This ensures that .modal-body takes up all available space */
     }
 
     /* Add Animation */
@@ -71,12 +83,13 @@
     }
 
     .modal-header {
-      padding: 2px 16px;
-      background-color: #5cb85c;
-      color: white;
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+    width: 100%;  /* This ensures that the header takes up the full width of its parent */
+    box-sizing: border-box;  /* This ensures that the padding is included in the element's total width */
     }
-
-    .modal-body {padding: 10px 16px;}
+    
   </style>
 </head>
 <body>
@@ -87,7 +100,7 @@
           <input v-model="numSectors" type="number" min="4" max="12" value="4">
           <button @click="confirmAndShowModal">Confirm</button>
           <button @click="spinWheel" :disabled="isSpinsRemainingZero()">StartSpin</button>
-          <div>{{prize}}</div>
+          <!-- <div>{{prize}}</div> -->
         </div>
         <div id="modal" class="modal" :style="{ display: isModalVisible ? 'block' : 'none' }">
           <div class="modal-content">
