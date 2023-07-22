@@ -16,7 +16,7 @@
   <div>
     <input v-model="numSectors" type="number" min="4" max="12" value="4">
     <button @click="initWheel">Confirm</button>
-    <button @click="spinWheel">StartSpin</button>
+    <button @click="spinWheel" :disabled="isSpinsRemainingZero()">StartSpin</button>
   </div>
   <div>{{prize}}</div>
 </div>
@@ -102,6 +102,9 @@ new Vue({
         this.startAngle = (2 * Math.PI) - (this.chosenBirdIndex * this.sectorArc) - (this.sectorArc / 2);
         this.drawWheel();
       }
+    },
+    isSpinsRemainingZero() {
+        return this.spinsRemaining === 0;
     }
   }
 });
