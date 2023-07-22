@@ -81,26 +81,26 @@
 </head>
 <body>
 
-  <div id="app">
-    <div id="spinboard">
-      <canvas ref="canvas" width="1000" height="1000"></canvas>
-      <input v-model="numSectors" type="number" min="4" max="12" value="4">
-      <button @click="confirmAndShowModal">Confirm</button>
-      <button @click="spinWheel" :disabled="isSpinsRemainingZero()">StartSpin</button>
-      <div>{{prize}}</div>
-    </div>
-    <div id="modal" class="modal" style="display:none">
-      <div class="modal-content">
-        <div class="modal-header">
-          <span class="close" @click="closeModal">&times;</span>
-          <h2>Please pick up avatar</h2>
+    <div id="app">
+        <div id="spinboard">
+          <canvas ref="canvas" width="1000" height="1000"></canvas>
+          <input v-model="numSectors" type="number" min="4" max="12" value="4">
+          <button @click="confirmAndShowModal">Confirm</button>
+          <button @click="spinWheel" :disabled="isSpinsRemainingZero()">StartSpin</button>
+          <div>{{prize}}</div>
         </div>
-        <div class="modal-body">
-          <div id="birds">{{birdNames}}</div>
+        <div id="modal" class="modal" :style="{ display: isModalVisible ? 'block' : 'none' }">
+          <div class="modal-content">
+            <div class="modal-header">
+              <span class="close" @click="closeModal">&times;</span>
+              <h2>{{ modalHeaderText }}</h2>
+            </div>
+            <div class="modal-body">
+              <div id="birds">{{ modalBodyText }}</div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
 
 <script>
 new Vue({
@@ -121,6 +121,9 @@ new Vue({
       birdNames: '',  // New property for storing bird names
       angle: 0,  // New property for storing the wheel's current angle
       modalVisible: false, // New property for controlling the modal's visibility
+      isModalVisible: false,
+      modalHeaderText: '',
+      modalBodyText: '',
     }
   },
   watch: {
@@ -140,19 +143,13 @@ new Vue({
   methods: {
     confirmAndShowModal() {
       this.initWheel();
-      this.showModal();
-    },    
-    showModal() {
-      this.modalVisible = true;
-      let modal = document.getElementById("modal");
-      modal.style.display = "block";
+      this.modalHeaderText = 'Please pick up avatar';
+      this.modalBodyText = this.birdNames;
+      this.isModalVisible = true;
     },
     closeModal() {
-      this.modalVisible = false;
-      let modal = document.getElementById("modal");
-      modal.style.display = "none";
-    },
-    // ...other methods...
+      this.isModalVisible = false;
+    },    
     initWheel() {
       this.ctx = this.$refs.canvas.getContext('2d');
       this.spinsRemaining = this.numSectors;
@@ -219,6 +216,9 @@ new Vue({
                 this.drawWheel();
             }
         }, 10);
+      this.modalHeaderText = 'The winner goes to';
+      this.modalBodyText = this.prize;
+      this.isModalVisible = true;
       }
     },
     isSpinsRemainingZero() {
