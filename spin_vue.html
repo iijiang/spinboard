@@ -18,6 +18,7 @@
     <button @click="initWheel">Confirm</button>
     <button @click="spinWheel" :disabled="isSpinsRemainingZero()">StartSpin</button>
   </div>
+  <div>{{birdNames}}</div>
   <div>{{prize}}</div>
 </div>
 
@@ -36,7 +37,8 @@ new Vue({
       prize: '',
       chosenBirdIndex: 0,
       birdsChosen: [],
-      colorsChosen: []
+      colorsChosen: [],
+      birdNames: '',  // New property for storing bird names
     }
   },
   watch: {
@@ -54,6 +56,11 @@ new Vue({
       this.spinsRemaining = this.numSectors;
       this.birdsChosen = [];
       this.colorsChosen = [];
+      this.birdNames = '';  // Reset the birdNames string
+      for (let i = 0; i < this.numSectors; i++) {  // For each sector...
+        this.birdNames += this.birds[i] + ', ';  // ...add the bird's name to birdNames...
+      }
+      this.birdNames = this.birdNames.slice(0, -2);  // ...and remove the trailing comma and space.      
       this.drawWheel();
     },
     drawWheel() {
