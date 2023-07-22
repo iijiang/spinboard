@@ -9,32 +9,98 @@
     }
     #app {
       display: flex;
-      justify-content: space-around;
+      justify-content: center;
       align-items: center;
       height: 100vh;
     }
-    #control-panel {
-      margin-left: 50px;
+    #spinboard {
+      text-align: center;
     }
+    #birds {
+      text-align: right;
+    }
+    /* The Modal (background) */
+    .modal {
+    display: flex;
+    justify-content: center;
+    position: fixed;
+    z-index: 1;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+    }
+
+    /* Modal Content */
+    .modal-content {
+      position: relative;
+      background-color: #fefefe;
+      margin: auto;
+      padding: 0;
+      border: 1px solid #888;
+      width: 300px;
+      height: 400px;
+      box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+      animation-name: animatetop;
+      animation-duration: 0.4s
+    }
+
+    /* Add Animation */
+    @keyframes animatetop {
+      from {top: -300px; opacity: 0} 
+      to {top: 0; opacity: 1}
+    }
+
+    /* The Close Button */
+    .close {
+      color: white;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: #000;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .modal-header {
+      padding: 2px 16px;
+      background-color: #5cb85c;
+      color: white;
+    }
+
+    .modal-body {padding: 10px 16px;}
   </style>
 </head>
 <body>
 
-<div id="app">
-  <div id="spinboard">
-    <canvas ref="canvas" width="1000" height="1000"></canvas>
-    <div>
+  <div id="app">
+    <div id="spinboard">
+      <canvas ref="canvas" width="1000" height="1000"></canvas>
       <input v-model="numSectors" type="number" min="4" max="12" value="4">
-      <button @click="initWheel">Confirm</button>
+      <button @click="confirmAndShowModal">Confirm</button>
       <button @click="spinWheel" :disabled="isSpinsRemainingZero()">StartSpin</button>
+      <div>{{prize}}</div>
     </div>
-    <div>{{prize}}</div>
+    <div id="modal" class="modal" style="display:none">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="close" @click="closeModal">&times;</span>
+          <h2>Please pick up avatar</h2>
+        </div>
+        <div class="modal-body">
+          <div id="birds">{{birdNames}}</div>
+        </div>
+      </div>
+    </div>
   </div>
-
-  <div id="control-panel">
-    <div id="birds">{{birdNames}}</div>
-  </div>
-</div>
 
 <script>
 new Vue({
@@ -54,6 +120,7 @@ new Vue({
       colorsChosen: [],
       birdNames: '',  // New property for storing bird names
       angle: 0,  // New property for storing the wheel's current angle
+      modalVisible: false, // New property for controlling the modal's visibility
     }
   },
   watch: {
@@ -62,10 +129,30 @@ new Vue({
       this.spinsRemaining = this.numSectors;
       this.birdsChosen = [];
       this.colorsChosen = [];
+      this.birdNames = '';  // Reset the birdNames string
+      for (let i = 0; i < this.numSectors; i++) {  // For each sector...
+        this.birdNames += this.birds[i] + ', ';  // ...add the bird's name to birdNames...
+      }
+      this.birdNames = this.birdNames.slice(0, -2);  // ...and remove the trailing comma and space.      
       this.drawWheel();
     }
   },
   methods: {
+    confirmAndShowModal() {
+      this.initWheel();
+      this.showModal();
+    },    
+    showModal() {
+      this.modalVisible = true;
+      let modal = document.getElementById("modal");
+      modal.style.display = "block";
+    },
+    closeModal() {
+      this.modalVisible = false;
+      let modal = document.getElementById("modal");
+      modal.style.display = "none";
+    },
+    // ...other methods...
     initWheel() {
       this.ctx = this.$refs.canvas.getContext('2d');
       this.spinsRemaining = this.numSectors;
