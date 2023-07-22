@@ -17,7 +17,7 @@
       text-align: center;
     }
     #birds {
-      text-align: right;
+      text-align: left;
     }
     /* The Modal (background) */
     .modal {
@@ -100,7 +100,6 @@
           <input v-model="numSectors" type="number" min="4" max="12" value="4">
           <button @click="confirmAndShowModal">Confirm</button>
           <button @click="spinWheel" :disabled="isSpinsRemainingZero()">StartSpin</button>
-          <!-- <div>{{prize}}</div> -->
         </div>
         <div id="modal" class="modal" :style="{ display: isModalVisible ? 'block' : 'none' }">
           <div class="modal-content">
@@ -109,7 +108,7 @@
               <h2>{{ modalHeaderText }}</h2>
             </div>
             <div class="modal-body">
-              <div id="birds">{{ modalBodyText }}</div>
+              <div id="birds" v-html="modalBodyText">{{ modalBodyText }}</div>
             </div>
           </div>
         </div>
@@ -137,7 +136,10 @@ new Vue({
       isModalVisible: false,
       modalHeaderText: '',
       modalBodyText: '',
-    }
+      //const emojis = ["&#128520;", "&#128522;", "&#128523;", "&#128526;", "&#128528;", "&#128529;", "&#128530;", "&#128531;", "&#128534;", "&#128536;", "&#128537;", "&#128538;"];
+      emojis: ["&#128038;", "&#128065;", "&#129417;", "&#129415;", "&#129446;", "&#129434;", "&#129433;", "&#129456;", "&#128020;", "&#128016;", "&#128036;", "&#128037;"],
+      //emojis: ["🦆", "🦅", "🦉", "🦇", "🦢", "🦜", "🦚", "🦩", "🐓", "🐔", "🐣", "🐤"],
+   }
   },
   watch: {
     numSectors: function() {
@@ -169,10 +171,12 @@ new Vue({
       this.birdsChosen = [];
       this.colorsChosen = [];
       this.birdNames = '';  // Reset the birdNames string
-      for (let i = 0; i < this.numSectors; i++) {  // For each sector...
-        this.birdNames += this.birds[i] + ', ';  // ...add the bird's name to birdNames...
-      }
-      this.birdNames = this.birdNames.slice(0, -2);  // ...and remove the trailing comma and space.      
+        for (let i = 0; i < this.numSectors; i++) {  // For each sector...
+        // Generate a random index for choosing an emoji
+        const emojiIndex = Math.floor(Math.random() * this.emojis.length);
+        // Prepend a random emoji and a space to each bird's name
+        this.birdNames += this.emojis[emojiIndex] + " " + this.birds[i] + '<br>';
+        }
       this.drawWheel();
     },
     drawWheel() {
