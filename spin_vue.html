@@ -15,8 +15,8 @@
   <canvas ref="canvas" width="500" height="500"></canvas>
   <div>
     <input v-model="numSectors" type="number" min="4" max="12" value="4">
-    <button @click="initWheel">确认</button>
-    <button @click="spinWheel" :disabled="isDisabled">开始转动</button>
+    <button @click="initWheel">Confirm</button>
+    <button @click="spinWheel">StartSpin</button>
   </div>
   <div>{{prize}}</div>
 </div>
@@ -32,21 +32,28 @@ new Vue({
       startAngle: 0,
       numSectors: 4,
       sectorArc: 2 * Math.PI / 4,
-      isDisabled: true,
+      spinsRemaining: 0,
       prize: '',
-      chosenBirdIndex: 0
+      chosenBirdIndex: 0,
+      birdsChosen: [],
+      colorsChosen: []
     }
   },
   watch: {
     numSectors: function() {
       this.sectorArc = 2 * Math.PI / this.numSectors;
+      this.spinsRemaining = this.numSectors;
+      this.birdsChosen = [];
+      this.colorsChosen = [];
       this.drawWheel();
     }
   },
   methods: {
     initWheel() {
       this.ctx = this.$refs.canvas.getContext('2d');
-      this.isDisabled = false;
+      this.spinsRemaining = this.numSectors;
+      this.birdsChosen = [];
+      this.colorsChosen = [];
       this.drawWheel();
     },
     drawWheel() {
@@ -81,27 +88,19 @@ new Vue({
       this.ctx.fill();
     },
     spinWheel() {
-      const spinDuration = 0.1;  // Adjust this for faster or slower spin
-      this.startAngle += spinDuration;
-      this.drawWheel();
-      if(this.startAngle > 2*Math.PI) {
-        this.isDisabled = true;
-        this.startAngle = 0;
-        this.chosenBirdIndex = Math.floor(Math.random() * this.numSectors);  // random index for prize
-        const birdPrize = this.birds[this.chosenBirdIndex]; // select the bird prize
-        this.prize = "Prize: " + birdPrize;
-        this.finalSpin();
-      } else {
-        requestAnimationFrame(this.spinWheel);
-      }
-    },
-    finalSpin() {
-      const targetAngle = (2 * Math.PI) - (this.chosenBirdIndex * this.sectorArc) - (this.sectorArc / 2);
-      const spinDuration = 0.02;  // Adjust this for faster or slower spin
-      if (this.startAngle < targetAngle) {
-        this.startAngle += spinDuration;
+      if (this.spinsRemaining > 0) {
+        let randomIndex;
+        do {
+          randomIndex = Math.floor(Math.random() * this.numSectors);
+        } while(this.birdsChosen.includes(this.birds[randomIndex]));
+
+        this.spinsRemaining -= 1;
+        this.chosenBirdIndex = randomIndex;
+        this.birdsChosen.push(this.birds[this.chosenBirdIndex]);
+        this.prize = "Prize: " + this.birds[this.chosenBirdIndex];
+
+        this.startAngle = (2 * Math.PI) - (this.chosenBirdIndex * this.sectorArc) - (this.sectorArc / 2);
         this.drawWheel();
-        requestAnimationFrame(this.finalSpin);
       }
     }
   }
